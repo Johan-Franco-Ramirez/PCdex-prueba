@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PCdex — Arma tu PC con inteligencia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Tokens ───────────────────────────────────────────────────── */
+    :root {
+      --ink:       #0b0f19;
+      --paper:     #f5f4f0;
+      --card:      #ffffff;
+      --accent:    #2563eb;
+      --accent2:   #7c3aed;
+      --muted:     #64748b;
+      --border:    #e2e8f0;
+      --chip-bg:   #eef2ff;
+      --chip-fg:   #3730a3;
+      --green:     #16a34a;
+      --ff-head:   'Space Grotesk', sans-serif;
+      --ff-mono:   'Space Mono', monospace;
+    }
+
+    /* ── Reset ───────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--ff-head); background: var(--paper); color: var(--ink); line-height: 1.6; }
+
+    /* ── Utilities ───────────────────────────────────────────────── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .tag { font-family: var(--ff-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--chip-fg); background: var(--chip-bg); padding: 4px 10px; border-radius: 99px; display: inline-block; }
+    .btn-primary {
+      display: inline-block; padding: 14px 32px; background: var(--accent);
+      color: #fff; font-family: var(--ff-head); font-size: 15px; font-weight: 600;
+      border-radius: 8px; text-decoration: none; transition: background .2s, transform .15s;
+      border: none; cursor: pointer;
+    }
+    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+    .btn-outline {
+      display: inline-block; padding: 13px 30px; border: 2px solid var(--accent);
+      color: var(--accent); font-family: var(--ff-head); font-size: 15px; font-weight: 600;
+      border-radius: 8px; text-decoration: none; transition: all .2s; background: transparent; cursor: pointer;
+    }
+    .btn-outline:hover { background: var(--accent); color: #fff; }
+
+    /* ── NAV ─────────────────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(245,244,240,.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      font-family: var(--ff-mono); font-size: 20px; font-weight: 700;
+      color: var(--ink); text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; transition: color .2s; }
+    .nav-links a:hover { color: var(--ink); }
+    .nav-cta { font-size: 14px; padding: 10px 22px; }
+
+    /* ── HERO ────────────────────────────────────────────────────── */
+    .hero {
+      padding: 100px 0 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+    }
+    .hero-eyebrow { margin-bottom: 20px; }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 700; line-height: 1.1;
+      letter-spacing: -.03em; margin-bottom: 20px;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p { font-size: 18px; color: var(--muted); max-width: 480px; margin-bottom: 36px; }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 32px; margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+    .stat-num { font-family: var(--ff-mono); font-size: 28px; font-weight: 700; color: var(--ink); }
+    .stat-label { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    /* Signature element: animated terminal card */
+    .terminal {
+      background: var(--ink); border-radius: 14px; overflow: hidden;
+      box-shadow: 0 32px 80px rgba(11,15,25,.25);
+      font-family: var(--ff-mono); font-size: 13px;
+    }
+    .terminal-bar {
+      background: #1e2535; padding: 12px 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.r { background: #ff5f57; }
+    .dot.y { background: #febc2e; }
+    .dot.g { background: #28c840; }
+    .terminal-title { margin-left: auto; margin-right: auto; color: #64748b; font-size: 11px; }
+    .terminal-body { padding: 20px 24px; color: #e2e8f0; line-height: 1.9; }
+    .t-prompt { color: #2563eb; }
+    .t-key   { color: #7dd3fc; }
+    .t-val   { color: #86efac; }
+    .t-out   { color: #fbbf24; }
+    .t-dim   { color: #475569; }
+    .t-match { color: #f0abfc; }
+    .cursor  { display: inline-block; width: 8px; height: 14px; background: #e2e8f0; vertical-align: middle; animation: blink 1s steps(1) infinite; }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+
+    /* ── VALUE PROP ──────────────────────────────────────────────── */
+    .section { padding: 80px 0; }
+    .section-header { text-align: center; margin-bottom: 56px; }
+    .section-header h2 { font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 700; letter-spacing: -.02em; margin-top: 12px; }
+    .section-header p { font-size: 17px; color: var(--muted); margin-top: 12px; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+    .value-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .value-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 32px 28px; position: relative; overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .value-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(11,15,25,.1); }
+    .value-icon { font-size: 32px; margin-bottom: 16px; }
+    .value-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .value-card p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+    .value-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0; transition: opacity .2s;
+    }
+    .value-card:hover::before { opacity: 1; }
+
+    /* ── HOW IT WORKS ────────────────────────────────────────────── */
+    .howit { background: var(--ink); color: var(--paper); }
+    .howit .section-header h2 { color: var(--paper); }
+    .howit .section-header p { color: #94a3b8; }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+    .step { padding: 36px 28px; border-right: 1px solid #1e2535; }
+    .step:last-child { border-right: none; }
+    .step-num { font-family: var(--ff-mono); font-size: 11px; color: #2563eb; letter-spacing: .1em; margin-bottom: 16px; }
+    .step h3 { font-size: 16px; font-weight: 700; color: var(--paper); margin-bottom: 8px; }
+    .step p { font-size: 14px; color: #94a3b8; line-height: 1.7; }
+    .step-icon { font-size: 28px; margin-bottom: 14px; }
+
+    /* ── BENEFITS ────────────────────────────────────────────────── */
+    .benefits-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .benefit-list { display: flex; flex-direction: column; gap: 20px; }
+    .benefit-item { display: flex; gap: 16px; align-items: flex-start; }
+    .benefit-check {
+      width: 28px; height: 28px; border-radius: 50%; background: #dcfce7;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      color: var(--green); font-size: 14px; margin-top: 2px;
+    }
+    .benefit-item h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .benefit-item p { font-size: 14px; color: var(--muted); }
+    .benefit-visual {
+      background: var(--ink); border-radius: 16px; padding: 32px;
+      box-shadow: 0 24px 60px rgba(11,15,25,.15);
+    }
+    .compat-title { font-family: var(--ff-mono); font-size: 11px; color: #64748b; letter-spacing: .1em; margin-bottom: 20px; }
+    .component-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #1e2535; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px;
+    }
+    .component-left { display: flex; flex-direction: column; }
+    .component-name { font-size: 13px; color: #e2e8f0; font-weight: 600; }
+    .component-spec { font-family: var(--ff-mono); font-size: 11px; color: #64748b; margin-top: 2px; }
+    .compat-badge {
+      font-family: var(--ff-mono); font-size: 10px; padding: 3px 8px; border-radius: 4px;
+    }
+    .ok { background: #14532d; color: #86efac; }
+    .warn { background: #7c2d12; color: #fdba74; }
+    .total-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0 0; border-top: 1px solid #1e2535; margin-top: 8px;
+    }
+    .total-label { font-size: 13px; color: #94a3b8; }
+    .total-price { font-family: var(--ff-mono); font-size: 20px; color: #86efac; font-weight: 700; }
+
+    /* ── TESTIMONIALS ────────────────────────────────────────────── */
+    .testimonials { background: #f8f9ff; }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .testi-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 28px;
+    }
+    .stars { color: #fbbf24; font-size: 14px; margin-bottom: 12px; }
+    .testi-card blockquote { font-size: 15px; color: var(--ink); line-height: 1.7; margin-bottom: 16px; }
+    .testi-author { display: flex; align-items: center; gap: 12px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-weight: 700; font-size: 14px; color: #fff;
+    }
+    .av1 { background: linear-gradient(135deg, #2563eb, #7c3aed); }
+    .av2 { background: linear-gradient(135deg, #16a34a, #0d9488); }
+    .av3 { background: linear-gradient(135deg, #dc2626, #ea580c); }
+    .author-name { font-size: 14px; font-weight: 700; }
+    .author-role { font-size: 12px; color: var(--muted); }
+
+    /* ── CTA FORM ────────────────────────────────────────────────── */
+    .cta-form-section {
+      background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+      color: white; text-align: center;
+    }
+    .cta-form-section h2 { font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 700; margin-bottom: 12px; }
+    .cta-form-section p { font-size: 17px; opacity: .85; margin-bottom: 40px; }
+    .form-row {
+      display: flex; gap: 12px; max-width: 520px; margin: 0 auto; flex-wrap: wrap; justify-content: center;
+    }
+    .form-row input {
+      flex: 1; min-width: 200px; padding: 14px 18px; border-radius: 8px;
+      border: none; font-family: var(--ff-head); font-size: 15px;
+      background: rgba(255,255,255,.15); color: white; outline: none;
+      backdrop-filter: blur(8px);
+    }
+    .form-row input::placeholder { color: rgba(255,255,255,.6); }
+    .form-row input:focus { background: rgba(255,255,255,.25); }
+    .btn-white {
+      padding: 14px 28px; background: white; color: var(--accent); font-family: var(--ff-head);
+      font-size: 15px; font-weight: 700; border-radius: 8px; border: none; cursor: pointer;
+      transition: transform .15s, box-shadow .2s; white-space: nowrap;
+    }
+    .btn-white:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+    .form-note { font-size: 12px; opacity: .7; margin-top: 12px; }
+
+    /* ── FAQ ─────────────────────────────────────────────────────── */
+    .faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+    details {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden;
+    }
+    summary {
+      padding: 18px 24px; font-weight: 600; font-size: 15px; cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: '+'; font-size: 20px; color: var(--accent); line-height: 1; }
+    details[open] summary::after { content: '−'; }
+    details p { padding: 0 24px 18px; font-size: 14px; color: var(--muted); line-height: 1.8; }
+
+    /* ── FOOTER ──────────────────────────────────────────────────── */
+    footer {
+      background: var(--ink); color: #94a3b8; padding: 56px 0 32px;
+    }
+    .footer-top {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; padding-bottom: 48px;
+      border-bottom: 1px solid #1e2535;
+    }
+    .footer-brand p { font-size: 14px; line-height: 1.7; margin-top: 12px; max-width: 280px; }
+    .footer-col h4 { font-size: 13px; font-weight: 700; color: var(--paper); letter-spacing: .05em; margin-bottom: 16px; }
+    .footer-col a { display: block; font-size: 14px; color: #94a3b8; text-decoration: none; margin-bottom: 8px; transition: color .2s; }
+    .footer-col a:hover { color: var(--paper); }
+    .footer-bottom {
+      display: flex; justify-content: space-between; align-items: center; padding-top: 28px; flex-wrap: wrap; gap: 12px;
+    }
+    .footer-bottom p { font-size: 13px; }
+    .footer-logo { font-family: var(--ff-mono); font-size: 18px; font-weight: 700; color: var(--paper); }
+
+    /* ── Responsive ──────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .terminal { display: none; }
+      .value-grid { grid-template-columns: 1fr 1fr; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .step { border-right: none; border-bottom: 1px solid #1e2535; }
+      .benefits-grid { grid-template-columns: 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .value-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; }
+      .hero-stats { flex-wrap: wrap; gap: 20px; }
+      .nav-links { display: none; }
+      .footer-top { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, .cursor { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="container nav-inner">
+    <a class="logo" href="#"><span class="logo-dot"></span>PCdex</a>
+    <ul class="nav-links">
+      <li><a href="#como-funciona">¿Cómo funciona?</a></li>
+      <li><a href="#beneficios">Beneficios</a></li>
+      <li><a href="#testimonios">Testimonios</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a class="btn-primary nav-cta" href="#registro">Comenzar gratis</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow">
+          <span class="tag">✦ Inteligencia Artificial · Proyecto SENA</span>
+        </div>
+        <h1>Arma tu PC<br>sin adivinar<br><span>qué comprar</span></h1>
+        <p>PCdex analiza tu presupuesto, tus necesidades y tu nivel técnico para recomendarte los componentes exactos, compatibles y al mejor precio.</p>
+        <div class="hero-actions">
+          <a href="#registro" class="btn-primary">Obtener mis recomendaciones</a>
+          <a href="#como-funciona" class="btn-outline">Ver cómo funciona</a>
+        </div>
+        <div class="hero-stats">
+          <div>
+            <div class="stat-num">500+</div>
+            <div class="stat-label">Componentes en catálogo</div>
+          </div>
+          <div>
+            <div class="stat-num">98%</div>
+            <div class="stat-label">Compatibilidad garantizada</div>
+          </div>
+          <div>
+            <div class="stat-num">4</div>
+            <div class="stat-label">Perfiles de uso cubiertos</div>
+          </div>
+        </div>
+      </div>
+      <!-- Signature: terminal card -->
+      <div>
+        <div class="terminal">
+          <div class="terminal-bar">
+            <span class="dot r"></span>
+            <span class="dot y"></span>
+            <span class="dot g"></span>
+            <span class="terminal-title">pcdex — recomendación IA</span>
+          </div>
+          <div class="terminal-body">
+            <div><span class="t-prompt">❯</span> pcdex <span class="t-key">--uso</span> <span class="t-val">gaming</span> <span class="t-key">--presupuesto</span> <span class="t-val">2500000</span></div>
+            <div class="t-dim">  Analizando requerimientos...</div>
+            <br>
+            <div class="t-out">  ✔ Procesador  → AMD Ryzen 5 7600X</div>
+            <div class="t-out">  ✔ Tarjeta madre → MSI MAG B650 Tomahawk</div>
+            <div class="t-out">  ✔ GPU          → RX 7600 8GB GDDR6</div>
+            <div class="t-out">  ✔ RAM          → 16 GB DDR5 5200 MHz</div>
+            <div class="t-out">  ✔ Almacen.     → SSD NVMe 500 GB</div>
+            <div class="t-out">  ✔ Fuente       → Corsair 650W 80+ Bronze</div>
+            <br>
+            <div class="t-match">  ⚡ Compatibilidad: TOTAL · Score: 97/100</div>
+            <div style="color:#86efac">  💰 Total estimado: $2.487.000 COP</div>
+            <br>
+            <div><span class="t-prompt">❯</span> <span class="cursor"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUE PROP -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="tag">Propuesta de valor</span>
+      <h2>¿Por qué PCdex?</h2>
+      <p>Dejá de perder horas comparando specs en foros. PCdex hace el trabajo duro por vos.</p>
+    </div>
+    <div class="value-grid">
+      <div class="value-card">
+        <div class="value-icon">🤖</div>
+        <h3>IA que entiende tu caso</h3>
+        <p>No es un filtro genérico. La IA considera tu presupuesto, el uso que le vas a dar al equipo y tu nivel de conocimiento técnico para darte la recomendación más precisa.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔗</div>
+        <h3>Compatibilidad verificada</h3>
+        <p>Cada build recomendada es revisada automáticamente para asegurar que todos los componentes funcionen juntos: socket, TDP, velocidad de RAM, formato de fuente y más.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🛒</div>
+        <h3>Links directos de compra</h3>
+        <p>PCdex conecta con tiendas como Amazon y MercadoLibre para mostrarte dónde conseguir cada componente al mejor precio. Sin pagos internos, sin complicaciones.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section howit" id="como-funciona">
+  <div class="container">
+    <div class="section-header">
+      <span class="tag" style="background:#1e2535;color:#7dd3fc">Proceso</span>
+      <h2>¿Cómo funciona?</h2>
+      <p>Cuatro pasos para pasar de "no sé nada de computadores" a tener tu build lista.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">PASO 01</div>
+        <div class="step-icon">🎯</div>
+        <h3>Contanos qué necesitás</h3>
+        <p>¿Gaming, diseño, programación u oficina? Ingresá tu presupuesto y el uso que le darás al equipo.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">PASO 02</div>
+        <div class="step-icon">⚡</div>
+        <h3>La IA analiza opciones</h3>
+        <p>El motor evalúa cientos de combinaciones compatibles, filtra por disponibilidad y precio, y selecciona las mejores para tu caso.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">PASO 03</div>
+        <div class="step-icon">📋</div>
+        <h3>Recibís tu build personalizada</h3>
+        <p>Obtenés una lista clara con cada componente, sus specs, el porqué de cada elección y el score de compatibilidad.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">PASO 04</div>
+        <div class="step-icon">🛍️</div>
+        <h3>Comprás donde quieras</h3>
+        <p>PCdex te redirige a tiendas autorizadas con los mejores precios actualizados. Elegís y comprás sin salir del flujo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="section" id="beneficios">
+  <div class="container">
+    <div class="benefits-grid">
+      <div>
+        <span class="tag">Beneficios</span>
+        <h2 style="font-size:clamp(1.8rem,3.5vw,2.4rem);font-weight:700;letter-spacing:-.02em;margin-top:12px;margin-bottom:32px;">Todo lo que necesitás<br>en un solo lugar</h2>
+        <div class="benefit-list">
+          <div class="benefit-item">
+            <div class="benefit-check">✓</div>
+            <div>
+              <h4>Acceso 24/7 desde cualquier dispositivo</h4>
+              <p>La plataforma es 100% web y responsiva. Desde el celular o el computador, siempre disponible.</p>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-check">✓</div>
+            <div>
+              <h4>Historial de recomendaciones</h4>
+              <p>Guardamos todas tus builds anteriores para que puedas compararlas, ajustarlas o compartirlas.</p>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-check">✓</div>
+            <div>
+              <h4>Autenticación segura</h4>
+              <p>Login con Google OAuth y verificación en dos pasos (2FA). Tu cuenta, protegida.</p>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-check">✓</div>
+            <div>
+              <h4>Sin conocimientos técnicos previos</h4>
+              <p>PCdex fue diseñado para principiantes. La IA explica cada recomendación en lenguaje sencillo.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="benefit-visual">
+        <div class="compat-title">VERIFICACIÓN DE COMPATIBILIDAD</div>
+        <div class="component-row">
+          <div class="component-left">
+            <span class="component-name">AMD Ryzen 5 7600X</span>
+            <span class="component-spec">Socket AM5 · 105W TDP</span>
+          </div>
+          <span class="compat-badge ok">✓ OK</span>
+        </div>
+        <div class="component-row">
+          <div class="component-left">
+            <span class="component-name">MSI MAG B650 Tomahawk</span>
+            <span class="component-spec">AM5 · DDR5 · PCIe 4.0</span>
+          </div>
+          <span class="compat-badge ok">✓ OK</span>
+        </div>
+        <div class="component-row">
+          <div class="component-left">
+            <span class="component-name">Corsair 550W 80+</span>
+            <span class="component-spec">ATX · Modular</span>
+          </div>
+          <span class="compat-badge warn">⚠ Revisar</span>
+        </div>
+        <div class="component-row">
+          <div class="component-left">
+            <span class="component-name">Kingston Fury 16GB DDR5</span>
+            <span class="component-spec">5200 MHz · CL40</span>
+          </div>
+          <span class="compat-badge ok">✓ OK</span>
+        </div>
+        <div class="total-row">
+          <span class="total-label">Total estimado</span>
+          <span class="total-price">$2.487.000</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section testimonials" id="testimonios">
+  <div class="container">
+    <div class="section-header">
+      <span class="tag">Prueba social</span>
+      <h2>Lo que dicen quienes ya lo usaron</h2>
+      <p>Usuarios reales que armaron su PC con la ayuda de PCdex.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"No tenía ni idea de qué comprar. PCdex me generó una build completa en menos de dos minutos y me explicó por qué cada componente tenía sentido para gaming. Me ahorró horas de investigación."</blockquote>
+        <div class="testi-author">
+          <div class="avatar av1">CM</div>
+          <div>
+            <div class="author-name">Carlos M.</div>
+            <div class="author-role">Gamer principiante · Medellín</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <blockquote>"Soy diseñadora gráfica y necesitaba un equipo para edición de video sin gastar de más. PCdex entendió exactamente mis necesidades y me recomendó una configuración equilibrada dentro de mi presupuesto."</blockquote>
+        <div class="testi-author">
+          <div class="avatar av2">LV</div>
+          <div>
+            <div class="author-name">Laura V.</div>
+            <div class="author-role">Diseñadora gráfica · Bogotá</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★☆</div>
+        <blockquote>"Lo que más me gustó fue la verificación de compatibilidad. Antes siempre tenía miedo de comprar algo que no funcionara junto. Con PCdex eso dejó de ser un problema."</blockquote>
+        <div class="testi-author">
+          <div class="avatar av3">JR</div>
+          <div>
+            <div class="author-name">Juan R.</div>
+            <div class="author-role">Estudiante de sistemas · Cali</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / FORM -->
+<section class="section cta-form-section" id="registro">
+  <div class="container">
+    <span class="tag" style="background:rgba(255,255,255,.15);color:white;margin-bottom:16px">Acceso anticipado · Gratis</span>
+    <h2>Empezá a armar tu PC hoy</h2>
+    <p>Registrate y recibí recomendaciones personalizadas sin costo. Sin tarjeta de crédito.</p>
+    <div class="form-row">
+      <input type="text" placeholder="Tu nombre" />
+      <input type="email" placeholder="Correo electrónico" />
+      <button class="btn-white">Registrarme →</button>
+    </div>
+    <p class="form-note">Al registrarte aceptás nuestras políticas de privacidad. Sin spam, prometido.</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-header">
+      <span class="tag">FAQ</span>
+      <h2>Preguntas frecuentes</h2>
+      <p>Todo lo que necesitás saber antes de empezar.</p>
+    </div>
+    <div class="faq-list">
+      <details>
+        <summary>¿PCdex es gratuito?</summary>
+        <p>Sí. PCdex está disponible sin costo durante su etapa de lanzamiento. El acceso básico con recomendaciones y verificación de compatibilidad es y seguirá siendo gratuito.</p>
+      </details>
+      <details>
+        <summary>¿Maneja pagos o ventas de componentes?</summary>
+        <p>No. PCdex no procesa pagos ni vende componentes directamente. La plataforma genera enlaces externos hacia tiendas autorizadas como Amazon y MercadoLibre donde podés completar tu compra de forma segura.</p>
+      </details>
+      <details>
+        <summary>¿Cómo garantizan la compatibilidad de los componentes?</summary>
+        <p>El motor de recomendación verifica automáticamente socket, TDP, tipo y velocidad de RAM, estándar PCIe, formato de fuente y factor de forma del gabinete. Cada build tiene un score de compatibilidad que te indica el nivel de confianza de la combinación.</p>
+      </details>
+      <details>
+        <summary>¿Puedo usarlo si no sé nada de hardware?</summary>
+        <p>¡Exactamente para eso fue diseñado! No necesitás conocimientos previos. PCdex te pregunta para qué vas a usar el equipo y cuánto querés gastar. El resto lo hace la IA, explicando cada decisión en lenguaje claro.</p>
+      </details>
+      <details>
+        <summary>¿Los precios están actualizados?</summary>
+        <p>PCdex se sincroniza periódicamente con las APIs de las tiendas asociadas para mantener los precios y la disponibilidad al día. Te recomendamos verificar el precio final en la tienda antes de comprar, ya que puede variar.</p>
+      </details>
+      <details>
+        <summary>¿Mis datos están seguros?</summary>
+        <p>Sí. Usamos autenticación con Google OAuth y doble factor (2FA con Google Authenticator). La plataforma implementa JWT, rate limiting y reCAPTCHA. Tu información no se comparte con terceros.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">PCdex</div>
+        <p>Sistema inteligente de recomendación y gestión de componentes para computadores de escritorio. Proyecto académico SENA – CTMA.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Plataforma</h4>
+        <a href="#">Recomendaciones</a>
+        <a href="#">Catálogo</a>
+        <a href="#">Historial</a>
+        <a href="#">Tiendas aliadas</a>
+      </div>
+      <div class="footer-col">
+        <h4>Proyecto</h4>
+        <a href="#">Sobre PCdex</a>
+        <a href="#">Equipo</a>
+        <a href="#">Documentación</a>
+        <a href="#">GitHub</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <a href="mailto:francoramirezjohan710@gmail.com">francoramirezjohan710@gmail.com</a>
+        <a href="#">Política de privacidad</a>
+        <a href="#">Términos y condiciones</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 PCdex · Johan Franco Ramírez · SENA CTMA</p>
+      <p>Hecho con ❤️ en Colombia</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
+pcdex-landing.html
+Mostrando pcdex-landing.html.
