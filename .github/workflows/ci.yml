@@ -1,0 +1,31 @@
+name: Validar PCDex
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  validar:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Verificar README
+        run: test -f README.md
+
+      - name: Verificar Backend
+        run: test -f backend/package.json
+
+      - name: Verificar Docker Compose
+        run: test -f docker-compose.yml
+
+      - name: Verificar Frontend
+        run: test -d frontend
+
+      - name: Proyecto validado
+        run: echo "PCDex validado correctamente"
