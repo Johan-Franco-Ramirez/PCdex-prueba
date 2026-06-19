@@ -3,98 +3,133 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PCdex — Arma tu PC con inteligencia</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --ink:      #0b0f19;
-      --paper:    #f5f4f0;
-      --card:     #ffffff;
-      --accent:   #2563eb;
-      --accent2:  #7c3aed;
-      --muted:    #64748b;
-      --border:   #e2e8f0;
-      --chip-bg:  #eef2ff;
-      --chip-fg:  #3730a3;
-      --green:    #16a34a;
-      --ff-head:  'Space Grotesk', sans-serif;
-      --ff-mono:  'Space Mono', monospace;
-      --glow-blue: rgba(37,99,235,0.25);
-      --glow-purple: rgba(124,58,237,0.2);
-    }
- 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { font-family: var(--ff-head); background: var(--paper); color: var(--ink); line-height: 1.6; overflow-x: hidden; }
- 
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--ink); }
-    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
- 
-    /* ── Utilities ── */
-    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-    .tag {
-      font-family: var(--ff-mono); font-size: 11px; letter-spacing: .12em;
-      text-transform: uppercase; color: var(--chip-fg); background: var(--chip-bg);
-      padding: 4px 10px; border-radius: 99px; display: inline-block;
-    }
-    .btn-primary {
-      display: inline-block; padding: 14px 32px; background: var(--accent);
-      color: #fff; font-family: var(--ff-head); font-size: 15px; font-weight: 600;
-      border-radius: 8px; text-decoration: none; border: none; cursor: pointer;
-      position: relative; overflow: hidden; transition: transform .2s, box-shadow .2s;
-    }
-    .btn-primary::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,.15), transparent);
-      opacity: 0; transition: opacity .2s;
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px var(--glow-blue); }
-    .btn-primary:hover::before { opacity: 1; }
-    .btn-outline {
-      display: inline-block; padding: 13px 30px; border: 2px solid var(--accent);
-      color: var(--accent); font-family: var(--ff-head); font-size: 15px; font-weight: 600;
-      border-radius: 8px; text-decoration: none; transition: all .2s; background: transparent; cursor: pointer;
-    }
-    .btn-outline:hover { background: var(--accent); color: #fff; box-shadow: 0 8px 32px var(--glow-blue); }
- 
-    /* ── Reveal animations ── */
-    .reveal {
-      opacity: 0; transform: translateY(28px);
-      transition: opacity .6s ease, transform .6s ease;
-    }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-    .reveal-delay-1 { transition-delay: .1s; }
-    .reveal-delay-2 { transition-delay: .2s; }
-    .reveal-delay-3 { transition-delay: .3s; }
-    .reveal-delay-4 { transition-delay: .4s; }
- 
-    /* ── NAV ── */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(245,244,240,.88); backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-      transition: box-shadow .3s;
-    }
-    nav.scrolled { box-shadow: 0 4px 32px rgba(11,15,25,.08); }
-    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
-    .logo {
-      font-family: var(--ff-mono); font-size: 20px; font-weight: 700;
-      color: var(--ink); text-decoration: none; display: flex; align-items: center; gap: 8px;
-    }
-    .logo-dot {
-      width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
-      animation: pulse-dot 2s ease-in-out infinite;
-    }
-    @keyframes pulse-dot {
-      0%,100% { box-shadow: 0 0 0 0 var(--glow-blue); }
-      50% { box-shadow: 0 0 0 6px transparent; }
-    }
-    .nav-links { display: flex; gap: 32px; list-style: none; }
-    .nav-links a { text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; transition: color .2s; }
-    .nav-links a:hover { color: var(--ink); }
-    .nav-cta { font-size: 14px; padding: 10px 22px; }
+<title>PCdex — Arma tu PC con inteligencia</title>
+
+<link rel="icon" type="image/png" sizes="32x32" href="public/logo-pcdex-icon.png">
+<link rel="apple-touch-icon" href="public/logo-pcdexfavicon.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --ink: #0b0f19;
+  --paper: #f5f4f0;
+  --card: #ffffff;
+  --accent: #2563eb;
+  --accent2: #7c3aed;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --chip-bg: #eef2ff;
+  --chip-fg: #3730a3;
+  --green: #16a34a;
+  --ff-head: 'Space Grotesk', sans-serif;
+  --ff-mono: 'Space Mono', monospace;
+  --glow-blue: rgba(37,99,235,0.25);
+  --glow-purple: rgba(124,58,237,0.2);
+}
+
+*, *::before, *::after{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:var(--ff-head);
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.6;
+  overflow-x:hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar{
+  width:6px;
+}
+
+::-webkit-scrollbar-track{
+  background:var(--ink);
+}
+
+::-webkit-scrollbar-thumb{
+  background:var(--accent);
+  border-radius:3px;
+}
+
+/* Utilities */
+.container{
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 24px;
+}
+
+/* NAV */
+
+nav{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:rgba(245,244,240,.88);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  transition:box-shadow .3s;
+}
+
+nav.scrolled{
+  box-shadow:0 4px 32px rgba(11,15,25,.08);
+}
+
+.nav-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  height:72px;
+}
+
+/* Logo */
+
+.logo{
+  display:flex;
+  align-items:center;
+  text-decoration:none;
+}
+
+.logo img{
+  height:50px;
+  width:auto;
+  transition:.3s ease;
+}
+
+.logo img:hover{
+  transform:scale(1.05);
+}
+
+.nav-links{
+  display:flex;
+  gap:32px;
+  list-style:none;
+}
+
+.nav-links a{
+  text-decoration:none;
+  color:var(--muted);
+  font-size:14px;
+  font-weight:500;
+  transition:color .2s;
+}
+
+.nav-links a:hover{
+  color:var(--ink);
+}
+
+.nav-cta{
+  font-size:14px;
+  padding:10px 22px;
+}
  
     /* ── HERO ── */
     .hero {
@@ -487,14 +522,17 @@
 <!-- NAV -->
 <nav id="navbar">
   <div class="container nav-inner">
-    <a class="logo" href="#"><span class="logo-dot"></span>PCdex</a>
+    <a href="#" class="logo">
+    <img src="public/logo-pcdexnav.png" alt="PCdex">
+  </a>
     <ul class="nav-links">
       <li><a href="#como-funciona">¿Cómo funciona?</a></li>
       <li><a href="#beneficios">Beneficios</a></li>
       <li><a href="#testimonios">Testimonios</a></li>
       <li><a href="#faq">FAQ</a></li>
     </ul>
-    <a class="btn-primary nav-cta" href="#registro">Comenzar gratis</a>
+    <button class="btn-primary nav-cta" onclick="document.getElementById('registro').scrollIntoView({ behavior: 'smooth' })" >Comenzar gratis</button>
+    
   </div>
 </nav>
  
@@ -506,17 +544,10 @@
   <div class="container">
     <div class="hero-grid">
       <div>
-        <div class="hero-eyebrow reveal">
-          <span class="tag">✦ Inteligencia Artificial · Proyecto SENA</span>
-        </div>
         <h1 class="reveal reveal-delay-1">
-          Arma tu PC<br>sin adivinar<br><span class="accent-word">qué comprar</span>
+          Arma tu PC<br>a tu manera <br><span class="accent-word">y a tu alcance</span>
         </h1>
-        <p class="reveal reveal-delay-2">PCdex analiza tu presupuesto, tus necesidades y tu nivel técnico para recomendarte los componentes exactos, compatibles y al mejor precio.</p>
-        <div class="hero-actions reveal reveal-delay-3">
-          <a href="#registro" class="btn-primary">Obtener mis recomendaciones</a>
-          <a href="#como-funciona" class="btn-outline">Ver cómo funciona</a>
-        </div>
+        <p class="reveal reveal-delay-2">PCdex analiza tu presupuesto, tus necesidades y tu nivel técnico para recomendarte los componentes exactos, compatibles y al mejor precio informandote en el proceso.</p>
         <div class="hero-stats reveal reveal-delay-4">
           <div><div class="stat-num">500+</div><div class="stat-label">Componentes en catálogo</div></div>
           <div><div class="stat-num">98%</div><div class="stat-label">Compatibilidad garantizada</div></div>
@@ -687,7 +718,6 @@
 <section class="section testimonials" id="testimonios">
   <div class="container" style="position:relative;z-index:1">
     <div class="section-header reveal">
-      <span class="tag">Prueba social</span>
       <h2>Lo que dicen quienes ya lo usaron</h2>
       <p>Usuarios reales que armaron su PC con la ayuda de PCdex.</p>
     </div>
@@ -720,21 +750,21 @@
   </div>
 </section>
  
-<!-- CTA / FORM -->
+<!-- FORM -->
 <section class="section cta-form-section" id="registro">
   <div class="cta-glow cta-glow-1"></div>
   <div class="cta-glow cta-glow-2"></div>
   <div class="container section-inner">
     <div class="reveal">
-      <span class="tag" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.15);margin-bottom:20px">Acceso anticipado · Gratis</span>
+      <span class="tag" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.15);margin-bottom:20px">Acceso anticipado </span>
       <h2>Empezá a armar tu PC hoy</h2>
-      <p>Registrate y recibí recomendaciones personalizadas sin costo. Sin tarjeta de crédito.</p>
+      <p>Registrate y recibí recomendaciones personalizadas.</p>
       <div class="form-row">
         <input type="text" placeholder="Tu nombre" />
         <input type="email" placeholder="Correo electrónico" />
         <button class="btn-white" >Registrarme →</button>
       </div>
-      <p class="form-note">Al registrarte aceptás nuestras políticas de privacidad. Sin spam, prometido.</p>
+      <p class="form-note">Al registrarte aceptás nuestras políticas de privacidad.</p>
     </div>
   </div>
 </section>
@@ -783,9 +813,9 @@
       <div class="footer-brand">
         <div class="footer-logo">PCdex</div>
         <p>Sistema inteligente de recomendación y gestión de componentes para computadores de escritorio. Proyecto académico SENA – CTMA.</p>
-        <div class="footer-badge"><span class="badge-dot"></span> Sistema activo · v2.0</div>
+        <div class="footer-badge"><span class="badge-dot"></span> Sistema activo · v1.0</div>
       </div>
-      <div class="footer-col">
+      <!-- <div class="footer-col">
         <h4>Plataforma</h4>
         <a href="#">Recomendaciones</a>
         <a href="#">Catálogo</a>
@@ -798,16 +828,11 @@
         <a href="#">Equipo</a>
         <a href="#">Documentación</a>
         <a href="#">GitHub</a>
-      </div>
+      </div> -->
       <div class="footer-col">
-        <h4>Contacto</h4>
-        <a href="mailto:francoramirezjohan710@gmail.com">francoramirezjohan710@gmail.com</a>
-        <a href="#">Política de privacidad</a>
-        <a href="#">Términos y condiciones</a>
-      </div>
     </div>
     <div class="footer-bottom">
-      <p>© 2026 PCdex · Johan Franco Ramírez · SENA CTMA</p>
+      <p>© 2026 PCdex · Grupo PCdex · SENA CTMA</p>
       <p>Hecho en Colombia</p>
     </div>
   </div>
